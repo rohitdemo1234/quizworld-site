@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Wallet 💰</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .wallet-box {
+      background-color: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      position: relative;
+    }
+    h1 {
+      font-size: 32px;
+      background: linear-gradient(to right, #ff6a00, #ee0979);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .coins {
+      font-size: 40px;
+      color: #f9a825;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    button {
+      margin-top: 25px;
+      padding: 12px 25px;
+      background: #f9a825;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #f57f17;
+    }
+    .lottie-box {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wallet-box">
+    <h1>My Wallet</h1>
+    <div class="coins">
+      <span id="balance">Loading...</span> 🪙
+    </div>
+    <div class="lottie-box">
+      <lottie-player src="https://assets4.lottiefiles.com/packages/lf20_u4yrau.json" background="transparent" speed="1" style="width: 120px; height: 120px;" loop autoplay></lottie-player>
+    </div>
+    <button onclick="window.location.href='index.html'">⬅ Back to Home</button>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD1G4rIda3S_e7R3q0ecJ1IFmPWoobtjd4",
+      authDomain: "quizworldweb.firebaseapp.com",
+      projectId: "quizworldweb",
+      storageBucket: "quizworldweb.appspot.com",
+      messagingSenderId: "503765027034",
+      appId: "1:503765027034:web:eac68bbbfdc31650dd3de3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        loadWallet(user.uid);
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+
+    function loadWallet(uid) {
+      const walletRef = firebase.database().ref('wallets/' + uid);
+      walletRef.once('value').then(function(snapshot) {
+        let balance = 0;
+        if (snapshot.exists()) {
+          balance = snapshot.val().balance || 0;
+        } else {
+          walletRef.set({balance: 0});
+        }
+        animateValue("balance", 0, balance, 1500);
+        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+      });
+    }
+
+    function animateValue(id, start, end, duration) {
+      let obj = document.getElementById(id);
+      let range = end - start;
+      let current = start;
+      let increment = end > start ? 1 : -1;
+      let stepTime = Math.abs(Math.floor(duration / range));
+      const timer = setInterval(function () {
+        current += increment;
+        obj.textContent = current;
+        if (current === end) {
+          clearInterval(timer);
+        }
+      }, stepTime);
+    }
+  </script>
+
+</body>
+</html>
